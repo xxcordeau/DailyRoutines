@@ -14,7 +14,7 @@ class QuickAddField extends ConsumerStatefulWidget {
 class _QuickAddFieldState extends ConsumerState<QuickAddField> {
   final _titleController = TextEditingController();
   final _memoController = TextEditingController();
-  bool _isRequired = true;
+  bool _isRequired = false;
   bool _showMemo = false;
 
   @override

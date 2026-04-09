@@ -161,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           if (routineTasks.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: TaskSectionHeader(
-                title: '평소 루틴',
+                title: '오늘 루틴',
                 completed: routProgress.completed,
                 total: routProgress.total,
                 isCollapsible: true,

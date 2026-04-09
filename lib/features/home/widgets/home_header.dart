@@ -42,7 +42,7 @@ class _LogoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 36,
+      height: 28,
       child: AspectRatio(
         aspectRatio: 386 / 250,
         child: SvgPicture.asset(
