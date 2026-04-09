@@ -345,6 +345,9 @@ class _InlineEditCardState extends State<_InlineEditCard> {
                           activeTrackColor: AppColors.primary,
                           inactiveThumbColor: Colors.white,
                           inactiveTrackColor: AppColors.border,
+                          trackOutlineColor: WidgetStateProperty.resolveWith(
+                            (states) => Colors.transparent,
+                          ),
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
                         ),

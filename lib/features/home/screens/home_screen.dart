@@ -51,34 +51,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  // 자정을 넘겨 날짜가 바뀌었으면 오늘 루틴 리셋, 필수 루틴은 이월
+  // 자정을 넘겨 날짜가 바뀌었으면 완료 상태 리셋 (필수 루틴은 매일 체크 풀림)
   void _checkDateChange() {
     final lastDateStr =
         HiveService.settings.get('lastDate', defaultValue: '') as String;
     final todayStr = AppDateUtils.today.toIso8601String().substring(0, 10);
 
     if (lastDateStr.isNotEmpty && lastDateStr != todayStr) {
-      final lastDate = DateTime.parse(lastDateStr);
-      final diff = AppDateUtils.today.difference(lastDate).inDays;
-      if (diff == 1) {
-        // 정확히 하루 경과: 필수 루틴 완료 상태 이월
-        _carryOverRequiredTasks(lastDate);
-      }
       ref.read(todayCompletionsProvider.notifier).refresh();
     }
     _updateLastDate();
-  }
-
-  // 어제 완료된 필수 루틴을 오늘 날짜로 복사
-  Future<void> _carryOverRequiredTasks(DateTime yesterday) async {
-    final repo = CompletionRepository();
-    final yesterdayCompletions = repo.getCompletionsForDate(yesterday);
-    final requiredTasks = ref.read(requiredTasksProvider);
-    for (final task in requiredTasks) {
-      if (yesterdayCompletions[task.id] == true) {
-        await repo.setCompletion(task.id, AppDateUtils.today, true);
-      }
-    }
   }
 
   void _updateLastDate() {

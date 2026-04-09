@@ -291,43 +291,67 @@ class _DayDetailCard extends StatelessWidget {
     final dayStr = weekdays[info.date.weekday % 7];
     final dateStr = '${DateFormat('yy.MM.dd').format(info.date)} ($dayStr)';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.border.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            dateStr,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          dateStr,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (notDone.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.border.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SectionLabel(label: '미완료', color: AppColors.textPrimary),
+                const SizedBox(height: 8),
+                ...notDone.map((t) => _TaskRow(title: t.title, done: false)),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          if (done.isNotEmpty) ...[
-            _SectionLabel(label: '완료', color: AppColors.primary),
-            const SizedBox(height: 6),
-            ...done.map((t) => _TaskRow(title: t.title, done: true)),
-            const SizedBox(height: 10),
-          ],
-          if (notDone.isNotEmpty) ...[
-            _SectionLabel(label: '미완료', color: AppColors.textSecondary),
-            const SizedBox(height: 6),
-            ...notDone.map((t) => _TaskRow(title: t.title, done: false)),
-          ],
-          if (done.isEmpty && notDone.isEmpty)
-            const Text(
+        if (notDone.isNotEmpty && done.isNotEmpty) const SizedBox(height: 10),
+        if (done.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.border.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SectionLabel(label: '완료', color: AppColors.textSecondary),
+                const SizedBox(height: 8),
+                ...done.map((t) => _TaskRow(title: t.title, done: true)),
+              ],
+            ),
+          ),
+        if (done.isEmpty && notDone.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.border.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Text(
               '기록된 루틴이 없습니다',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -360,25 +384,15 @@ class _TaskRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Icon(
-            done ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
-            size: 15,
-            color: done ? AppColors.primary : AppColors.textSecondary,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 13,
-                color: done ? AppColors.textPrimary : AppColors.textSecondary,
-                decoration: done ? TextDecoration.none : TextDecoration.none,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          color: done ? AppColors.textSecondary : AppColors.textPrimary,
+          decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
+          decorationColor: AppColors.textSecondary,
+          decorationThickness: 1.5,
+        ),
       ),
     );
   }

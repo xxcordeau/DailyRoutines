@@ -3,8 +3,14 @@
   "configurations": [
     {
       "name": "flutter-web",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-l", "8080", "build/web"],
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080
+    },
+    {
+      "name": "flutter-web-server",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "web-server", "--web-port", "8080"],
       "port": 8080
     }
   ]

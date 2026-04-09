@@ -14,6 +14,7 @@ class QuickAddField extends ConsumerStatefulWidget {
 class _QuickAddFieldState extends ConsumerState<QuickAddField> {
   final _titleController = TextEditingController();
   final _memoController = TextEditingController();
+  final _subItemControllers = <TextEditingController>[];
   bool _isRequired = false;
   bool _showMemo = false;
 
@@ -27,7 +28,21 @@ class _QuickAddFieldState extends ConsumerState<QuickAddField> {
   void dispose() {
     _titleController.dispose();
     _memoController.dispose();
+    for (final c in _subItemControllers) {
+      c.dispose();
+    }
     super.dispose();
+  }
+
+  void _addSubItem() {
+    setState(() => _subItemControllers.add(TextEditingController()));
+  }
+
+  void _removeSubItem(int i) {
+    setState(() {
+      _subItemControllers[i].dispose();
+      _subItemControllers.removeAt(i);
+    });
   }
 
   void _addTask() {
@@ -41,11 +56,21 @@ class _QuickAddFieldState extends ConsumerState<QuickAddField> {
           : _memoController.text.trim(),
       isRequired: _isRequired,
       isRoutine: !_isRequired,
+      subItems: _subItemControllers
+          .map((c) => c.text.trim())
+          .where((s) => s.isNotEmpty)
+          .toList(),
     );
 
     _titleController.clear();
     _memoController.clear();
-    setState(() => _showMemo = false);
+    for (final c in _subItemControllers) {
+      c.dispose();
+    }
+    setState(() {
+      _showMemo = false;
+      _subItemControllers.clear();
+    });
   }
 
   @override
@@ -124,6 +149,9 @@ class _QuickAddFieldState extends ConsumerState<QuickAddField> {
                           activeTrackColor: AppColors.primary,
                           inactiveThumbColor: Colors.white,
                           inactiveTrackColor: AppColors.border,
+                          trackOutlineColor: WidgetStateProperty.resolveWith(
+                            (states) => Colors.transparent,
+                          ),
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
                         ),
@@ -169,10 +197,54 @@ class _QuickAddFieldState extends ConsumerState<QuickAddField> {
             duration: const Duration(milliseconds: 180),
           ),
 
+          // 서브아이템
+          if (_subItemControllers.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+              child: Column(
+                children: [
+                  for (int i = 0; i < _subItemControllers.length; i++)
+                    Row(
+                      children: [
+                        const Text('• ',
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary)),
+                        Expanded(
+                          child: TextField(
+                            controller: _subItemControllers[i],
+                            decoration: InputDecoration(
+                              hintText: '항목 ${i + 1}',
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              contentPadding: EdgeInsets.zero,
+                              hintStyle: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary
+                                      .withValues(alpha: 0.5)),
+                            ),
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _removeSubItem(i),
+                          child: Icon(Icons.close,
+                              size: 16, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+
           // 구분선
           Divider(height: 1, thickness: 0.8, color: AppColors.border),
 
-          // 하단: 메모 버튼 + 등록 하기
+          // 하단: 메모 버튼 + 항목 버튼 + 등록 하기
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
             child: Row(
@@ -203,6 +275,26 @@ class _QuickAddFieldState extends ConsumerState<QuickAddField> {
                               : FontWeight.normal,
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 항목 추가 버튼
+                GestureDetector(
+                  onTap: _addSubItem,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedAddCircle,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text('항목',
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary)),
                     ],
                   ),
                 ),

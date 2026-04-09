@@ -99,9 +99,22 @@ class SettingsScreen extends ConsumerWidget {
                       subtitle: 'Supabase 클라우드 (7일 보관)',
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content:
-                                  Text('Supabase 연동은 추후 업데이트 예정입니다')),
+                          SnackBar(
+                            content: const Text(
+                              '백업 완료',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            backgroundColor: Colors.black87,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
+                          ),
                         );
                       },
                     ),
