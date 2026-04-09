@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../core/constants/app_colors.dart';
@@ -126,6 +127,18 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     const Divider(height: 1, indent: 56),
                     _SettingsTile(
+                      icon: HugeIcons.strokeRoundedCopy01,
+                      iconColor: AppColors.textSecondary,
+                      title: '백업 ID 복사',
+                      subtitle: SupabaseBackupService.deviceId.substring(0, 8),
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(
+                            text: SupabaseBackupService.deviceId));
+                        _showSnackBar(context, '백업 ID가 복사되었습니다');
+                      },
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _SettingsTile(
                       icon: HugeIcons.strokeRoundedCloudDownload,
                       iconColor: AppColors.primary,
                       title: '데이터 복원',
@@ -154,14 +167,17 @@ class SettingsScreen extends ConsumerWidget {
     final success = await SupabaseBackupService.backup();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    _showSnackBar(
-      context,
-      success ? '백업 완료' : '백업 실패. 다시 시도해주세요',
-      isError: !success,
-    );
+    if (success) {
+      final id = SupabaseBackupService.deviceId;
+      final shortId = id.length > 8 ? id.substring(0, 8) : id;
+      _showSnackBar(context, '백업 완료 (ID: $shortId)');
+    } else {
+      _showSnackBar(context, '백업 실패. 다시 시도해주세요', isError: true);
+    }
   }
 
   void _showRestoreDialog(BuildContext context, WidgetRef ref) {
+    final idController = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -169,8 +185,22 @@ class SettingsScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('데이터 복원'),
-        content: const Text(
-            '클라우드 백업에서 데이터를 불러옵니다.\n현재 데이터를 덮어씁니다.'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('클라우드 백업에서 데이터를 불러옵니다.\n현재 데이터를 덮어씁니다.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: idController,
+              decoration: InputDecoration(
+                hintText: '백업 ID (비워두면 이 기기)',
+                hintStyle: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -181,7 +211,10 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(ctx);
               _showSnackBar(context, '복원 중...');
-              final success = await SupabaseBackupService.restore();
+              final inputId = idController.text.trim();
+              final success = await SupabaseBackupService.restore(
+                fromDeviceId: inputId.isEmpty ? null : inputId,
+              );
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               if (success) {

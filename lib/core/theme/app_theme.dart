@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
-  static const String fontFamily = 'Pretendard';
-
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      fontFamily: fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
@@ -20,7 +17,6 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          fontFamily: fontFamily,
           color: AppColors.primary,
           fontSize: 22,
           fontWeight: FontWeight.w800,
@@ -50,7 +46,6 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         hintStyle: const TextStyle(
-          fontFamily: fontFamily,
           color: AppColors.textSecondary,
           fontSize: 14,
         ),
@@ -66,24 +61,20 @@ class AppTheme {
       ),
       textTheme: const TextTheme(
         headlineMedium: TextStyle(
-          fontFamily: fontFamily,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         titleMedium: TextStyle(
-          fontFamily: fontFamily,
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         bodyMedium: TextStyle(
-          fontFamily: fontFamily,
           fontSize: 14,
           color: AppColors.textPrimary,
         ),
         bodySmall: TextStyle(
-          fontFamily: fontFamily,
           fontSize: 12,
           color: AppColors.textSecondary,
         ),

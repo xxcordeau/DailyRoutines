@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/utils/id_generator.dart';
 import '../local/hive_service.dart';
 import '../models/task.dart';
 import '../models/task_completion.dart';
@@ -9,15 +9,22 @@ import '../models/goal.dart';
 
 class SupabaseBackupService {
   static const _table = 'backups';
+  static const _deviceIdKey = 'device_uuid';
 
   static SupabaseClient get _client => Supabase.instance.client;
 
-  /// 고유 디바이스 ID (닉네임 기반)
+  /// 고유 디바이스 ID (UUID, 기기별 고유값)
   static String get _deviceId {
-    final nickname =
-        HiveService.settings.get('nickname', defaultValue: '') as String;
-    return nickname.isNotEmpty ? nickname : 'unknown';
+    var id = HiveService.settings.get(_deviceIdKey, defaultValue: '') as String;
+    if (id.isEmpty) {
+      id = IdGenerator.generate();
+      HiveService.settings.put(_deviceIdKey, id);
+    }
+    return id;
   }
+
+  /// 현재 디바이스 ID 조회 (복원 시 입력용으로 표시)
+  static String get deviceId => _deviceId;
 
   /// Hive 전체 데이터를 JSON으로 직렬화
   static Map<String, dynamic> _serializeAll() {
@@ -91,12 +98,14 @@ class SupabaseBackupService {
   }
 
   /// 복원: 가장 최신 백업에서 Hive로 덮어쓰기
-  static Future<bool> restore() async {
+  /// [fromDeviceId]를 지정하면 해당 기기의 백업에서 복원
+  static Future<bool> restore({String? fromDeviceId}) async {
     try {
+      final targetId = fromDeviceId ?? _deviceId;
       final response = await _client
           .from(_table)
           .select()
-          .eq('device_id', _deviceId)
+          .eq('device_id', targetId)
           .order('created_at', ascending: false)
           .limit(1);
 
