@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/local/hive_service.dart';
 import '../../home/providers/tasks_provider.dart';
@@ -28,6 +29,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
+
+            // 프로필
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -42,79 +45,75 @@ class SettingsScreen extends ConsumerWidget {
                     child: Icon(Icons.person, color: Color(0xFF9E9E9E), size: 32),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nickname,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '오늘도 좋은 하루 되세요!',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                      ),
-                    ],
+                  Text(
+                    nickname,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
+
+            // 닉네임 변경 + 데이터 초기화
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.edit_outlined, color: AppColors.primary),
-                    title: const Text('닉네임 변경'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showNicknameDialog(context, ref, nickname),
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  ListTile(
-                    leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                    title: const Text('데이터 초기화'),
-                    subtitle: const Text('모든 루틴 데이터를 삭제합니다'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showResetDialog(context, ref),
-                  ),
-                ],
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: HugeIcons.strokeRoundedPencilEdit01,
+                      iconColor: AppColors.primary,
+                      title: '닉네임 변경',
+                      onTap: () => _showNicknameDialog(context, ref, nickname),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _SettingsTile(
+                      icon: HugeIcons.strokeRoundedDelete02,
+                      iconColor: Colors.redAccent,
+                      title: '데이터 초기화',
+                      subtitle: '모든 루틴 데이터를 삭제합니다',
+                      onTap: () => _showResetDialog(context, ref),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
+
+            // 백업 + 앱 정보
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.backup_outlined, color: AppColors.primary),
-                    title: const Text('데이터 백업'),
-                    subtitle: const Text('Supabase 클라우드 (7일 보관)'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Supabase 연동은 추후 업데이트 예정입니다')),
-                      );
-                    },
-                  ),
-                  const Divider(height: 1, indent: 56),
-                  const ListTile(
-                    leading: Icon(Icons.info_outline, color: AppColors.primary),
-                    title: Text('앱 정보'),
-                    subtitle: Text('v1.0.0'),
-                    trailing: Icon(Icons.chevron_right),
-                  ),
-                ],
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: HugeIcons.strokeRoundedCloudUpload,
+                      iconColor: AppColors.primary,
+                      title: '데이터 백업',
+                      subtitle: 'Supabase 클라우드 (7일 보관)',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Supabase 연동은 추후 업데이트 예정입니다')),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    const _SettingsTile(
+                      icon: HugeIcons.strokeRoundedInformationCircle,
+                      iconColor: AppColors.primary,
+                      title: '앱 정보',
+                      subtitle: 'v1.0.0',
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -123,12 +122,16 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showNicknameDialog(BuildContext context, WidgetRef ref, String current) {
+  void _showNicknameDialog(
+      BuildContext context, WidgetRef ref, String current) {
     final controller = TextEditingController(text: current);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('닉네임 변경'),
         content: TextField(
           controller: controller,
@@ -138,7 +141,8 @@ class SettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('취소',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () async {
@@ -160,13 +164,18 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('데이터 초기화'),
-        content: const Text('모든 루틴 데이터를 초기화합니다.\n이 작업은 되돌릴 수 없습니다.'),
+        content: const Text(
+            '모든 루틴 데이터를 초기화합니다.\n이 작업은 되돌릴 수 없습니다.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('취소',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () async {
@@ -178,11 +187,52 @@ class SettingsScreen extends ConsumerWidget {
               ref.read(todayCompletionsProvider.notifier).refresh();
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            style:
+                TextButton.styleFrom(foregroundColor: Colors.redAccent),
             child: const Text('초기화'),
           ),
         ],
       ),
+    );
+  }
+}
+
+// 재사용 설정 타일
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: HugeIcon(icon: icon, size: 20, color: iconColor),
+      title: Text(title, style: const TextStyle(fontSize: 15)),
+      subtitle: subtitle != null
+          ? Text(subtitle!,
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textSecondary))
+          : null,
+      trailing: onTap != null
+          ? HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              size: 16,
+              color: AppColors.textSecondary,
+            )
+          : null,
+      onTap: onTap,
+      hoverColor: AppColors.border.withValues(alpha: 0.4),
+      splashColor: AppColors.border.withValues(alpha: 0.3),
     );
   }
 }
