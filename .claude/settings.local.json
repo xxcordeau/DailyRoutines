@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(\"C:/Users/User/flutter/bin/flutter.bat\" pub:*)",
+      "Bash(\"C:/Users/User/flutter/bin/flutter.bat\" analyze:*)",
+      "Bash(\"C:/Users/User/flutter/bin/flutter.bat\" build:*)",
+      "Bash(cmd /c \"C:\\\\Users\\\\User\\\\flutter\\\\bin\\\\flutter.bat build web --release 2>&1\")",
+      "Bash(cmd /c \"C:\\\\Users\\\\User\\\\flutter\\\\bin\\\\flutter.bat build web --release\")",
+      "Bash(/c/Users/User/flutter/bin/flutter build:*)"
+    ]
+  }
+}

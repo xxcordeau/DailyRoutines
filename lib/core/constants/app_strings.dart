@@ -1,0 +1,29 @@
+class AppStrings {
+  static const String appName = 'dh';
+  static const String todayTasks = '오늘 할일';
+  static const String requiredTasks = '오늘 할일';
+  static const String requiredLabel = '(필수)';
+  static const String regularRoutine = '평소 루틴';
+  static const String completedRoutine = '완료 루틴';
+  static const String totalProgress = '총';
+  static const String completed = '완료';
+  static const String addTask = '할일 추가';
+  static const String editTask = '할일 수정';
+  static const String delete = '삭제';
+  static const String save = '저장';
+  static const String cancel = '취소';
+  static const String title = '제목';
+  static const String memo = '메모';
+  static const String subItems = '세부 항목';
+  static const String addSubItem = '항목 추가';
+  static const String viewHistory = '기록 보기';
+  static const String settings = '설정';
+  static const String home = '홈';
+  static const String history = '기록';
+  static const String goal = '목표';
+  static const String goalCompleted = '추가 완료';
+  static const String userName = '정연';
+  static const String nim = '님';
+  static const String taskHint = '오늘 할일';
+  static const String memoHint = '메모하기';
+}

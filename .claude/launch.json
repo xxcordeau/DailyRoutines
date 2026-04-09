@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flutter-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8080", "build/web"],
+      "port": 8080
+    }
+  ]
+}
