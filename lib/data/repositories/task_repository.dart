@@ -34,6 +34,24 @@ class TaskRepository {
     }
   }
 
+  // 특정 섹션 내 순서를 변경할 때 기존 order 슬롯을 유지하며 재배정
+  Future<void> reorderSection(List<Task> reorderedSection) async {
+    if (reorderedSection.isEmpty) return;
+    final allSorted = getAllTasks();
+    final sectionIds = reorderedSection.map((t) => t.id).toSet();
+
+    final existingOrders = allSorted
+        .where((t) => sectionIds.contains(t.id))
+        .map((t) => t.order)
+        .toList()
+      ..sort();
+
+    for (int i = 0; i < reorderedSection.length; i++) {
+      reorderedSection[i].order = existingOrders[i];
+      await HiveService.tasks.put(reorderedSection[i].id, reorderedSection[i]);
+    }
+  }
+
   int getNextOrder() {
     final tasks = getAllTasks();
     if (tasks.isEmpty) return 0;

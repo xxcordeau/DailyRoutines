@@ -1,4 +1,6 @@
 import 'package:go_router/go_router.dart';
+import '../../data/local/hive_service.dart';
+import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/history/screens/history_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
@@ -7,7 +9,19 @@ import '../../shared/widgets/app_shell.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/home',
+  redirect: (context, state) {
+    final nickname =
+        HiveService.settings.get('nickname', defaultValue: '') as String;
+    if (nickname.isEmpty && state.matchedLocation != '/onboarding') {
+      return '/onboarding';
+    }
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
     ShellRoute(
       builder: (context, state, child) => AppShell(child: child),
       routes: [

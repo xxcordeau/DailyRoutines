@@ -57,6 +57,11 @@ class TasksNotifier extends StateNotifier<List<Task>> {
     _load();
   }
 
+  Future<void> reorderSection(List<Task> reorderedSection) async {
+    await _repository.reorderSection(reorderedSection);
+    _load();
+  }
+
   void refresh() => _load();
 }
 
