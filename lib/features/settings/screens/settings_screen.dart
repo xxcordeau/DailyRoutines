@@ -3,12 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/local/hive_service.dart';
+import '../../../data/remote/supabase_backup_service.dart';
 import '../../home/providers/tasks_provider.dart';
 import '../../home/providers/completion_provider.dart';
+import '../../history/providers/history_provider.dart';
 import '../providers/nickname_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  void _showSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: isError ? Colors.redAccent : Colors.black87,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +65,8 @@ class SettingsScreen extends ConsumerWidget {
                   const CircleAvatar(
                     radius: 30,
                     backgroundColor: Color(0xFFE8E8E8),
-                    child: Icon(Icons.person, color: Color(0xFF9E9E9E), size: 32),
+                    child:
+                        Icon(Icons.person, color: Color(0xFF9E9E9E), size: 32),
                   ),
                   const SizedBox(width: 16),
                   Text(
@@ -69,7 +93,8 @@ class SettingsScreen extends ConsumerWidget {
                       icon: HugeIcons.strokeRoundedPencilEdit01,
                       iconColor: AppColors.primary,
                       title: '닉네임 변경',
-                      onTap: () => _showNicknameDialog(context, ref, nickname),
+                      onTap: () =>
+                          _showNicknameDialog(context, ref, nickname),
                     ),
                     const Divider(height: 1, indent: 56),
                     _SettingsTile(
@@ -85,7 +110,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // 백업 + 앱 정보
+            // 백업 + 복원 + 앱 정보
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Container(
@@ -96,27 +121,16 @@ class SettingsScreen extends ConsumerWidget {
                       icon: HugeIcons.strokeRoundedCloudUpload,
                       iconColor: AppColors.primary,
                       title: '데이터 백업',
-                      subtitle: 'Supabase 클라우드 (7일 보관)',
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              '백업 완료',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            backgroundColor: Colors.black87,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 16),
-                          ),
-                        );
-                      },
+                      subtitle: '클라우드 저장 (3일 보관)',
+                      onTap: () => _doBackup(context),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _SettingsTile(
+                      icon: HugeIcons.strokeRoundedCloudDownload,
+                      iconColor: AppColors.primary,
+                      title: '데이터 복원',
+                      subtitle: '클라우드에서 불러오기',
+                      onTap: () => _showRestoreDialog(context, ref),
                     ),
                     const Divider(height: 1, indent: 56),
                     const _SettingsTile(
@@ -131,6 +145,59 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _doBackup(BuildContext context) async {
+    _showSnackBar(context, '백업 중...');
+    final success = await SupabaseBackupService.backup();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    _showSnackBar(
+      context,
+      success ? '백업 완료' : '백업 실패. 다시 시도해주세요',
+      isError: !success,
+    );
+  }
+
+  void _showRestoreDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('데이터 복원'),
+        content: const Text(
+            '클라우드 백업에서 데이터를 불러옵니다.\n현재 데이터를 덮어씁니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child:
+                Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              _showSnackBar(context, '복원 중...');
+              final success = await SupabaseBackupService.restore();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              if (success) {
+                ref.read(tasksProvider.notifier).refresh();
+                ref.read(todayCompletionsProvider.notifier).refresh();
+                ref.read(historyProvider.notifier).refresh();
+                ref.read(nicknameProvider.notifier).reload();
+                _showSnackBar(context, '복원 완료');
+              } else {
+                _showSnackBar(context, '복원할 백업이 없습니다', isError: true);
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            child: const Text('복원'),
+          ),
+        ],
       ),
     );
   }
@@ -198,10 +265,13 @@ class SettingsScreen extends ConsumerWidget {
               await HiveService.goals.clear();
               ref.read(tasksProvider.notifier).refresh();
               ref.read(todayCompletionsProvider.notifier).refresh();
+              ref.read(historyProvider.notifier).refresh();
               if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted) {
+                _showSnackBar(context, '초기화 완료');
+              }
             },
-            style:
-                TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
             child: const Text('초기화'),
           ),
         ],

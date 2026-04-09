@@ -20,4 +20,6 @@ class NicknameNotifier extends StateNotifier<String> {
     await HiveService.settings.put(_nicknameKey, name.trim());
     state = name.trim();
   }
+
+  void reload() => _load();
 }

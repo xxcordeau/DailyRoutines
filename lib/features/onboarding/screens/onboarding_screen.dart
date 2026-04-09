@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/remote/supabase_backup_service.dart';
+import '../../home/providers/tasks_provider.dart';
+import '../../home/providers/completion_provider.dart';
+import '../../history/providers/history_provider.dart';
 import '../../settings/providers/nickname_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -14,6 +18,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = TextEditingController();
+  bool _restoring = false;
 
   @override
   void initState() {
@@ -32,6 +37,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (name.isEmpty) return;
     await ref.read(nicknameProvider.notifier).setNickname(name);
     if (mounted) context.go('/home');
+  }
+
+  Future<void> _restore() async {
+    setState(() => _restoring = true);
+    final success = await SupabaseBackupService.restore();
+    if (!mounted) return;
+
+    if (success) {
+      ref.read(tasksProvider.notifier).refresh();
+      ref.read(todayCompletionsProvider.notifier).refresh();
+      ref.read(historyProvider.notifier).refresh();
+      ref.read(nicknameProvider.notifier).reload();
+      context.go('/home');
+    } else {
+      setState(() => _restoring = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '복원할 백업이 없습니다',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: Colors.black87,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+      );
+    }
   }
 
   @override
@@ -94,6 +128,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              // 시작하기
               AnimatedOpacity(
                 opacity: hasInput ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
@@ -119,6 +154,39 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 기존 데이터 복원
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: _restoring ? null : _restore,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    side: BorderSide(color: AppColors.border),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _restoring
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.textSecondary,
+                          ),
+                        )
+                      : const Text(
+                          '기존 데이터 복원',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
             ],

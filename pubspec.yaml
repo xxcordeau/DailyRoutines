@@ -21,6 +21,7 @@ dependencies:
   hugeicons: ^0.0.7
   flutter_svg: ^2.0.10+1
   home_widget: ^0.6.0
+  supabase_flutter: ^2.12.2
 
 dev_dependencies:
   flutter_test:
