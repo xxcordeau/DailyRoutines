@@ -1,17 +1,19 @@
-# dailyroutine
+# Daily Routine
 
-A new Flutter project.
+하루 루틴을 관리하고 꾸준히 이어나갈 수 있도록 도와주는 Flutter 앱입니다.
 
-## Getting Started
+## 주요 기능
 
-This project is a starting point for a Flutter application.
+- **루틴 관리** — 필수 루틴과 평소 루틴을 분리해서 관리할 수 있습니다
+- **빠른 추가** — 홈 화면에서 텍스트 입력 하나로 빠르게 루틴을 추가할 수 있습니다
+- **서브 아이템 & 메모** — 각 태스크에 세부 항목과 메모를 추가해 구체적인 계획을 세울 수 있습니다
+- **히트맵 캘린더** — 날짜별 루틴 완료율을 히트맵으로 시각화해 꾸준함을 한눈에 확인할 수 있습니다
+- **목표 설정** — 루틴과 연결되는 목표를 설정하고 관리할 수 있습니다
 
-A few resources to get you started if this is your first Flutter project:
+## 기술 스택
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- **Flutter** (Dart)
+- **Riverpod** — 상태 관리
+- **Hive** — 로컬 데이터 저장
+- **go_router** — 화면 라우팅
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
