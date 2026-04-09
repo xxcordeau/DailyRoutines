@@ -7,7 +7,14 @@
       "Bash(\"C:/Users/User/flutter/bin/flutter.bat\" build:*)",
       "Bash(cmd /c \"C:\\\\Users\\\\User\\\\flutter\\\\bin\\\\flutter.bat build web --release 2>&1\")",
       "Bash(cmd /c \"C:\\\\Users\\\\User\\\\flutter\\\\bin\\\\flutter.bat build web --release\")",
-      "Bash(/c/Users/User/flutter/bin/flutter build:*)"
+      "Bash(/c/Users/User/flutter/bin/flutter build:*)",
+      "Bash(/c/Users/User/Desktop/PJ/dailyroutine/ios/WidgetExtension/DailyRoutineWidget.swift:*)",
+      "Bash(/c/Users/User/flutter/bin/flutter pub:*)",
+      "Bash(sed -i 's/void _onReorderRequired\\(int oldIndex, int newIndex, List tasks\\)/void _onReorderRequired\\(int oldIndex, int newIndex, List<dynamic> tasks\\)/' /c/Users/User/Desktop/PJ/dailyroutine/lib/features/home/screens/home_screen.dart)",
+      "Bash(sed -i 's/void _onReorderRoutine\\(int oldIndex, int newIndex, List tasks\\)/void _onReorderRoutine\\(int oldIndex, int newIndex, List<dynamic> tasks\\)/' /c/Users/User/Desktop/PJ/dailyroutine/lib/features/home/screens/home_screen.dart)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
