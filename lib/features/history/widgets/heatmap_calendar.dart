@@ -287,7 +287,9 @@ class _DayDetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = tasks.where((t) => info.completions[t.id] == true).toList();
     final notDone = tasks.where((t) => info.completions[t.id] != true).toList();
-    final dateStr = DateFormat('yy.MM.dd (E)', 'ko').format(info.date);
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    final dayStr = weekdays[info.date.weekday % 7];
+    final dateStr = '${DateFormat('yy.MM.dd').format(info.date)} ($dayStr)';
 
     return Container(
       width: double.infinity,

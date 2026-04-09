@@ -95,8 +95,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (total > 0) {
       CompletionRepository()
           .saveDailyRecord(AppDateUtils.today, total, completed);
-      ref.read(historyProvider.notifier).refresh();
     }
+    if (mounted) ref.read(historyProvider.notifier).refresh();
   }
 
   // 완료 상태 변경 시 iOS 위젯 데이터 갱신
@@ -127,8 +127,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 완료 상태 변경마다 위젯 갱신
+    // 완료 상태 변경마다 기록/위젯 갱신
     ref.listen<Map<String, bool>>(todayCompletionsProvider, (_, __) {
+      _saveDailyRecord();
       _refreshWidget();
     });
 
