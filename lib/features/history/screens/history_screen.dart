@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/history_provider.dart';
+import '../../home/providers/tasks_provider.dart';
 import '../widgets/heatmap_calendar.dart';
 
 class HistoryScreen extends ConsumerWidget {
@@ -10,6 +11,7 @@ class HistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final records = ref.watch(historyProvider);
+    final tasks = ref.watch(tasksProvider);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -42,7 +44,7 @@ class HistoryScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: HeatmapCalendar(records: records),
+              child: HeatmapCalendar(records: records, tasks: tasks),
             ),
             const SizedBox(height: 32),
           ],

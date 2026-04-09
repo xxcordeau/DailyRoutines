@@ -3,11 +3,18 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../data/models/daily_record.dart';
+import '../../../data/models/task.dart';
+import '../../../data/repositories/completion_repository.dart';
 
 class HeatmapCalendar extends StatefulWidget {
   final Map<String, DailyRecord> records;
+  final List<Task> tasks;
 
-  const HeatmapCalendar({super.key, required this.records});
+  const HeatmapCalendar({
+    super.key,
+    required this.records,
+    required this.tasks,
+  });
 
   @override
   State<HeatmapCalendar> createState() => _HeatmapCalendarState();
@@ -84,6 +91,20 @@ class _HeatmapCalendarState extends State<HeatmapCalendar> {
       return DateFormat('M월').format(first);
     }
     return null;
+  }
+
+  void _onCellTap(DateTime date) {
+    final key = date.toIso8601String().substring(0, 10);
+    final record = widget.records[key];
+    final completions = CompletionRepository().getCompletionsForDate(date);
+    setState(() {
+      _tooltip = _TooltipInfo(
+        date: date,
+        percent: record != null ? (record.completionRate * 100).toInt() : 0,
+        hasRecord: record != null,
+        completions: completions,
+      );
+    });
   }
 
   @override
@@ -198,6 +219,14 @@ class _HeatmapCalendarState extends State<HeatmapCalendar> {
             ],
           ],
         ),
+        // 날짜별 태스크 상세 카드
+        if (_tooltip != null && widget.tasks.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _DayDetailCard(
+            info: _tooltip!,
+            tasks: widget.tasks,
+          ),
+        ],
       ],
     );
   }
@@ -218,20 +247,7 @@ class _HeatmapCalendarState extends State<HeatmapCalendar> {
         AppDateUtils.isSameDay(date, _tooltip!.date);
 
     return GestureDetector(
-      onTapDown: date != null
-          ? (_) {
-              final key = date.toIso8601String().substring(0, 10);
-              final record = widget.records[key];
-              setState(() {
-                _tooltip = _TooltipInfo(
-                  date: date,
-                  percent:
-                      record != null ? (record.completionRate * 100).toInt() : 0,
-                  hasRecord: record != null,
-                );
-              });
-            }
-          : null,
+      onTapDown: date != null ? (_) => _onCellTap(date) : null,
       child: Container(
         width: cellSize,
         height: cellSize,
@@ -252,8 +268,118 @@ class _TooltipInfo {
   final DateTime date;
   final int percent;
   final bool hasRecord;
-  _TooltipInfo(
-      {required this.date, required this.percent, required this.hasRecord});
+  final Map<String, bool> completions;
+  _TooltipInfo({
+    required this.date,
+    required this.percent,
+    required this.hasRecord,
+    required this.completions,
+  });
+}
+
+class _DayDetailCard extends StatelessWidget {
+  final _TooltipInfo info;
+  final List<Task> tasks;
+
+  const _DayDetailCard({required this.info, required this.tasks});
+
+  @override
+  Widget build(BuildContext context) {
+    final done = tasks.where((t) => info.completions[t.id] == true).toList();
+    final notDone = tasks.where((t) => info.completions[t.id] != true).toList();
+    final dateStr = DateFormat('yy.MM.dd (E)', 'ko').format(info.date);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.border.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            dateStr,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (done.isNotEmpty) ...[
+            _SectionLabel(label: '완료', color: AppColors.primary),
+            const SizedBox(height: 6),
+            ...done.map((t) => _TaskRow(title: t.title, done: true)),
+            const SizedBox(height: 10),
+          ],
+          if (notDone.isNotEmpty) ...[
+            _SectionLabel(label: '미완료', color: AppColors.textSecondary),
+            const SizedBox(height: 6),
+            ...notDone.map((t) => _TaskRow(title: t.title, done: false)),
+          ],
+          if (done.isEmpty && notDone.isEmpty)
+            const Text(
+              '기록된 루틴이 없습니다',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _SectionLabel({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: color,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+class _TaskRow extends StatelessWidget {
+  final String title;
+  final bool done;
+  const _TaskRow({required this.title, required this.done});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            done ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+            size: 15,
+            color: done ? AppColors.primary : AppColors.textSecondary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                color: done ? AppColors.textPrimary : AppColors.textSecondary,
+                decoration: done ? TextDecoration.none : TextDecoration.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TooltipBadge extends StatelessWidget {
@@ -274,7 +400,9 @@ class _TooltipBadge extends StatelessWidget {
       ),
       child: Text(label,
           style: const TextStyle(
-              color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500)),
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500)),
     );
   }
 }

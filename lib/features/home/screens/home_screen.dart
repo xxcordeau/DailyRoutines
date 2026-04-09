@@ -1,3 +1,4 @@
+import '../../history/providers/history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -50,15 +51,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  // 자정을 넘겨 날짜가 바뀌었으면 completion 초기화
+  // 자정을 넘겨 날짜가 바뀌었으면 오늘 루틴 리셋, 필수 루틴은 이월
   void _checkDateChange() {
-    final lastDate =
+    final lastDateStr =
         HiveService.settings.get('lastDate', defaultValue: '') as String;
-    final today = AppDateUtils.today.toIso8601String().substring(0, 10);
-    if (lastDate.isNotEmpty && lastDate != today) {
+    final todayStr = AppDateUtils.today.toIso8601String().substring(0, 10);
+
+    if (lastDateStr.isNotEmpty && lastDateStr != todayStr) {
+      final lastDate = DateTime.parse(lastDateStr);
+      final diff = AppDateUtils.today.difference(lastDate).inDays;
+      if (diff == 1) {
+        // 정확히 하루 경과: 필수 루틴 완료 상태 이월
+        _carryOverRequiredTasks(lastDate);
+      }
       ref.read(todayCompletionsProvider.notifier).refresh();
     }
     _updateLastDate();
+  }
+
+  // 어제 완료된 필수 루틴을 오늘 날짜로 복사
+  Future<void> _carryOverRequiredTasks(DateTime yesterday) async {
+    final repo = CompletionRepository();
+    final yesterdayCompletions = repo.getCompletionsForDate(yesterday);
+    final requiredTasks = ref.read(requiredTasksProvider);
+    for (final task in requiredTasks) {
+      if (yesterdayCompletions[task.id] == true) {
+        await repo.setCompletion(task.id, AppDateUtils.today, true);
+      }
+    }
   }
 
   void _updateLastDate() {
@@ -75,6 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (total > 0) {
       CompletionRepository()
           .saveDailyRecord(AppDateUtils.today, total, completed);
+      ref.read(historyProvider.notifier).refresh();
     }
   }
 
