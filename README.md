@@ -1,24 +1,11 @@
 
-
 # dailyroutine
 
-A new Flutter project.
 
-## Getting Started
+<img width="1440" height="1024" alt="2033" src="https://github.com/user-attachments/assets/6721f6b6-5b63-468f-ad4d-d72c3621a6e3" />
+<img width="1620" height="910" alt="Frame 1618868964" src="https://github.com/user-attachments/assets/0702c104-f0be-4702-8a7a-a7cd93b3f29f" />
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-개인정보 처리방침
+# 개인정보 처리방침
 
 본 앱(DailyRoutines)은 사용자의 개인정보를 수집하지 않습니다.
 
@@ -26,4 +13,4 @@ samples, guidance on mobile development, and a full API reference.
 사용자가 직접 설정한 백업 코드로만 접근 가능합니다.
 이름, 이메일, 위치 등 개인 식별 정보는 수집하지 않습니다.
 
-문의: (이메일 주소)
+문의: qazseeszaq3219@gmail.com
